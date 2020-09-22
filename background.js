@@ -2,23 +2,21 @@ var bkg = chrome.extension.getBackgroundPage();
 // state determines the status of webpage after analysis
 // 0 -> safe,		1/2 -> malicious. 	-1 -> not determined / error
 
-// get currrent state of webpage from server by sending webpage link
-var getCurrentPageState = (tab_link="", current_page=true) => {
-	if(current_page) {
-		tab_link = window.location.href;	// current webpage link
-	}
+api_link = 'https://malicious-urls-detection.herokuapp.com';
+predict_action_PATH = '/predict'
 
-	api_link = 'http://127.0.0.1:5000/predict';
+// get currrent state of webpage from server by sending webpage link
+var getPageState = (page_link="") => {
 
 	const options = {
 		method: 'POST',
-		body: JSON.stringify({url : tab_link}),
+		body: JSON.stringify({url : page_link}),
 		headers : {
 			'Content-Type': 'application/json'
 		}
 	}
 
-	return fetch(api_link, options)
+	return fetch(api_link + predict_action_PATH, options)
 	.then(res => res.json())
 	.then(data => {
 		return data.state;
@@ -30,14 +28,50 @@ var getCurrentPageState = (tab_link="", current_page=true) => {
 
 }
 
+// PS : This was returning undefined
+// var getCurrentPageState =  () => {
+// 	return chrome.tabs.query({
+// 	  active: true,
+// 	  currentWindow: true
+// 		}, (tabs) => {
+// 		  var url = tabs[0].url;
+// 		  return getPageState(url);
+// 	});
+// }
 
-// Check state before openinng or refreshing any page.
+
+var actionOnUnsafeURL = () => {
+	alert("This Webpage might be malicious. If you don't trust this website leave.");
+}
+
+
+// DICTIONARY for all tabs
+// var tabsDICT = {};
+
+// Check state before openinng or refreshing any web page.
 chrome.webNavigation.onBeforeNavigate.addListener(function() {
-	getCurrentPageState()
-	.then(state => {
-		// bkg.console.log('BKG state : ' + state);
-	})
-	.catch(err => {
-		console.log('Server Not Responding.');
+	QUERY_OPTIONS = {
+	  // active: true,
+	  currentWindow: true
+	}
+
+	chrome.tabs.query(QUERY_OPTIONS, (tabs) => {
+	  // var url = tabs[0].url;	// current page url from chrome api.
+	  // bkg.console.log(tabs);
+
+	  tabs.forEach( (tab) => {
+		  getPageState(tab.url)
+		  .then(state => {
+				bkg.console.log(tab.url, 'BKG state : ' + state);
+				// Notify user about any unsafe url
+				if(state != 0 && state != -1) {
+					actionOnUnsafeURL();
+				}
+			})
+			.catch(err => {
+				bkg.console.log('Server Not Responding.');
+			});
+		});
+
 	});
 });
