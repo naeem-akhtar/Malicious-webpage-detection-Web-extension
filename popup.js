@@ -9,29 +9,37 @@ var UpdatePopup = (state_text="loading..", state_color="grey") => {
 
 
 var UpdatePopupByState = () => {
-	bkg.getCurrentPageState()
-	.then(state => {
-		// bkg.console.log('POP state : ' + state);
+	UpdatePopup();
 
-		// safe
-		if(state == 0) {
-			UpdatePopup('Safe', 'green');
-		}
-		// server didn't responded
-		else if(state == -1) {
-			UpdatePopup("Can't say", "yellow");
-		}
-		// Malicious
-		else {
+	QUERY_OPTIONS = {
+	  active: true,
+	  currentWindow: true
+	}
 
-		}
-
-	})
-	.catch(err => {
-		// Default Popup
-		UpdatePopup();
-		bkg.console.log('Server Not Responding.');
+	// get current active tab url and check state.
+	chrome.tabs.query(QUERY_OPTIONS, (tabs) => {
+		bkg.getPageState(tabs[0].url)
+		.then(state => {
+			// safe
+			if(state == 0) {
+				UpdatePopup('Safe', 'green');
+			}
+			// server didn't responded
+			else if(state == -1) {
+				UpdatePopup("Can't say", "yellow");
+			}
+			// Malicious
+			else {
+				UpdatePopup("Malicious", "red");
+			}
+		})
+		.catch(err => {
+			// Default Popup
+			UpdatePopup();
+			bkg.console.log('Server Not Responding.');
+		});
 	});
+
 }
 
 
@@ -39,9 +47,8 @@ var testLinkState = (div_id = "#test_link_box") => {
 	prefix_html_tag = "<p id='test_link_result' style='color:"
 	$("#test_link_result").remove();	// remove previos result from test link checking.
 	test_link = $("#test_link").val();
-	bkg.console.log(test_link);
 
-	bkg.getCurrentPageState(test_link)
+	bkg.getPageState(test_link)
 	.then(state => {
 		// safe
 		if(state == 0) {
@@ -53,7 +60,7 @@ var testLinkState = (div_id = "#test_link_box") => {
 		}
 		// Malicious
 		else {
-			$(div_id).append("red'> This url is Malicious.</p>");
+			$(div_id).append(prefix_html_tag + "red'> This url is Malicious.</p>");
 		}
 
 	})
@@ -71,6 +78,5 @@ $(document).ready(function(){
   // check a link from popup
   $("#test_button").click(function() {
   	testLinkState();
-  })
+  });
 });
-
