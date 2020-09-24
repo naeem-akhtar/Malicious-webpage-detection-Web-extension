@@ -40,8 +40,18 @@ var getPageState = (page_link="") => {
 // }
 
 
-var actionOnUnsafeURL = () => {
-	alert("This Webpage might be malicious. If you don't trust this website leave.");
+var actionOnUnsafeURL = (url = "") => {
+	// window.alert("This Webpage might be malicious. If you don't trust this website leave.");
+	notification_name = "malicious_url_alert";
+	notification_OPTIONS = {
+    type: 'basic',
+    iconUrl: 'https://kasikornbank.com/en/personal/Digital-banking/KBankCyberRisk/Pages/img/phishing/Kbank_icon_2-07.png',
+    title: "Malicious URL detected",
+    message: "This Webpage might be malicious. If you don't trust this website leave.\nURL : " + url
+  };
+	chrome.notifications.create(notification_name, notification_OPTIONS, () => {
+
+	});
 }
 
 
@@ -65,11 +75,11 @@ chrome.webNavigation.onBeforeNavigate.addListener(function() {
 				bkg.console.log(tab.url, 'BKG state : ' + state);
 				// Notify user about any unsafe url
 				if(state != 0 && state != -1) {
-					actionOnUnsafeURL();
+					actionOnUnsafeURL(tab.url);
 				}
 			})
 			.catch(err => {
-				bkg.console.log('Server Not Responding.');
+				bkg.console.log('Server Not Responding.' + err);
 			});
 		});
 

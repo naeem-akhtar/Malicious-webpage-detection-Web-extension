@@ -12,6 +12,7 @@
     "tabs",
     "storage",
     "webNavigation",
+    "notifications",
     "https://ajax.googleapis.com/",
     "<all_urls>"
   ],
