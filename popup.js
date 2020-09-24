@@ -1,10 +1,13 @@
 var bkg = chrome.extension.getBackgroundPage();
 
 var UpdatePopup = (state_text="loading..", state_color="grey") => {
-	var state_id = "#state";
+	let state_id = "#state";
+	let reload_icon = "(&#x21bb;)";
+	let state_html_content = " <button type='button' id='recheck_button' name='recheck_button'>" + reload_icon + "</button>";
 
-	$(state_id).text(state_text);
 	$(state_id).css('color', state_color);
+	$(state_id).text(state_text);
+	$(state_id).append(state_html_content);
 }
 
 
@@ -20,6 +23,7 @@ var UpdatePopupByState = () => {
 	chrome.tabs.query(QUERY_OPTIONS, (tabs) => {
 		bkg.getPageState(tabs[0].url)
 		.then(state => {
+			bkg.console.log('asdas');
 			// safe
 			if(state == 0) {
 				UpdatePopup('Safe', 'green');
@@ -45,6 +49,8 @@ var UpdatePopupByState = () => {
 
 var testLinkState = (div_id = "#test_link_box") => {
 	prefix_html_tag = "<p id='test_link_result' style='color:"
+	suffix_html_tag = "</p>"
+
 	$("#test_link_result").remove();	// remove previos result from test link checking.
 	test_link = $("#test_link").val();
 
@@ -52,15 +58,15 @@ var testLinkState = (div_id = "#test_link_box") => {
 	.then(state => {
 		// safe
 		if(state == 0) {
-			$(div_id).append(prefix_html_tag + "green'> This url is safe.</p>");
+			$(div_id).append(prefix_html_tag + "green'> This url is safe." + suffix_html_tag);
 		}
 		// server didn't responded
 		else if(state == -1) {
-			$(div_id).append(prefix_html_tag + "yellow'> This url cannot br checked.</p>");
+			$(div_id).append(prefix_html_tag + "yellow'> This url cannot br checked." + suffix_html_tag);
 		}
 		// Malicious
 		else {
-			$(div_id).append(prefix_html_tag + "red'> This url is Malicious.</p>");
+			$(div_id).append(prefix_html_tag + "red'> This url is Malicious." + suffix_html_tag);
 		}
 
 	})
@@ -75,8 +81,22 @@ $(document).ready(function(){
 	// Update popup window according to state of webpage
   UpdatePopupByState();
 
+  let reload_button = "#recheck_button";
+  // reload current page state
+  $("#state").on('click', reload_button, () => {
+  	UpdatePopupByState();
+  });
+
+  let test_button = "#test_button";
   // check a link from popup
-  $("#test_button").click(function() {
+  $(test_button).click(function() {
   	testLinkState();
   });
+
+  let refresh_button = "#refresh_button";
+  // refresh button clicked
+  $(refresh_button).click( () => {
+  	bkg.clearTabsUrlState();
+  });
+
 });

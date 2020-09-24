@@ -28,18 +28,6 @@ var getPageState = (page_link="") => {
 
 }
 
-// PS : This was returning undefined
-// var getCurrentPageState =  () => {
-// 	return chrome.tabs.query({
-// 	  active: true,
-// 	  currentWindow: true
-// 		}, (tabs) => {
-// 		  var url = tabs[0].url;
-// 		  return getPageState(url);
-// 	});
-// }
-
-
 var actionOnUnsafeURL = (url = "") => {
 	// window.alert("This Webpage might be malicious. If you don't trust this website leave.");
 	notification_name = "malicious_url_alert";
@@ -62,12 +50,18 @@ let addTabsUrlState = (url, state) => {
 	tabs_url_state.set(url, state);
 }
 
-// Check state before openinng or refreshing any web page.
+// use var for global scope
+var clearTabsUrlState = () => {
+	tabs_url_state.clear();
+}
+
+// Any new tab is opened or reload.
 chrome.webNavigation.onBeforeNavigate.addListener(function() {
 	QUERY_OPTIONS = {
 	  currentWindow: true
 	}
 
+	// check state of any new url
 	chrome.tabs.query(QUERY_OPTIONS, (tabs) => {
 	  // iterate all active tabs urls
 	  tabs.forEach( (tab) => {
