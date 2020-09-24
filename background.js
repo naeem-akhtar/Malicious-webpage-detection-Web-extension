@@ -55,33 +55,36 @@ var actionOnUnsafeURL = (url = "") => {
 }
 
 
-// DICTIONARY for all tabs
-// var tabsDICT = {};
+// MAP for all known tabs url with state from server
+let tabs_url_state = new Map();
+
+let addTabsUrlState = (url, state) => {
+	tabs_url_state.set(url, state);
+}
 
 // Check state before openinng or refreshing any web page.
 chrome.webNavigation.onBeforeNavigate.addListener(function() {
 	QUERY_OPTIONS = {
-	  // active: true,
 	  currentWindow: true
 	}
 
 	chrome.tabs.query(QUERY_OPTIONS, (tabs) => {
-	  // var url = tabs[0].url;	// current page url from chrome api.
-	  // bkg.console.log(tabs);
-
+	  // iterate all active tabs urls
 	  tabs.forEach( (tab) => {
-		  getPageState(tab.url)
-		  .then(state => {
-				bkg.console.log(tab.url, 'BKG state : ' + state);
-				// Notify user about any unsafe url
-				if(state != 0 && state != -1) {
-					actionOnUnsafeURL(tab.url);
-				}
-			})
-			.catch(err => {
-				bkg.console.log('Server Not Responding.' + err);
-			});
+	  	if(!tabs_url_state.has(tab.url)) {	// new url found
+			  getPageState(tab.url)
+			  .then(state => {
+					bkg.console.log(tab.url, 'BKG state : ' + state);
+					addTabsUrlState(tab.url, state);	// add new url and state to Map
+					if(state != 0 && state != -1) {  // Notify user about any unsafe url
+						actionOnUnsafeURL(tab.url);
+					}
+				})
+				.catch(err => {
+					bkg.console.log('Server Not Responding.' + err);
+				});
+			}
 		});
-
 	});
+
 });
