@@ -28,7 +28,7 @@ var getPageState = (page_link="") => {
 
 }
 
-var actionOnUnsafeURL = (url = "") => {
+let actionOnUnsafeURL = (url = "") => {
 	// window.alert("This Webpage might be malicious. If you don't trust this website leave.");
 	notification_name = "malicious_url_alert";
 	notification_OPTIONS = {

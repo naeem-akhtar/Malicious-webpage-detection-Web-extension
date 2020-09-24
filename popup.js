@@ -1,7 +1,7 @@
 var bkg = chrome.extension.getBackgroundPage();
 
 
-var UpdatePopup = (state_text="loading..", state_color="grey", currentTabID=null) => {
+let UpdatePopup = (state_text="loading..", state_color="grey", currentTabID=null) => {
 	let state_id = "#state";
 	let reload_icon = "(&#x21bb;)";
 	let state_html_content = " <button type='button' id='recheck_button' name='recheck_button'>" + reload_icon + "</button>";
@@ -21,7 +21,7 @@ var UpdatePopup = (state_text="loading..", state_color="grey", currentTabID=null
 }
 
 
-var UpdatePopupByState = () => {
+let UpdatePopupByState = () => {
 	UpdatePopup();
 
 	QUERY_OPTIONS = {
@@ -56,7 +56,7 @@ var UpdatePopupByState = () => {
 }
 
 
-var testLinkState = (div_id = "#test_link_box") => {
+let testLinkState = (div_id = "#test_link_box") => {
 	prefix_html_tag = "<p id='test_link_result' style='color:"
 	suffix_html_tag = "</p>"
 
@@ -86,7 +86,7 @@ var testLinkState = (div_id = "#test_link_box") => {
 }
 
 
-$(document).ready(function(){
+$(document).ready( () => {
 	// Update popup window according to state of webpage
   UpdatePopupByState();
 
@@ -98,7 +98,7 @@ $(document).ready(function(){
 
   let test_button = "#test_button";
   // check a link from popup
-  $(test_button).click(function() {
+  $(test_button).click( () => {
   	testLinkState();
   });
 
