@@ -1,30 +1,34 @@
 var bkg = chrome.extension.getBackgroundPage();
 
+const iconPath = {
+	'green' : 'images/logo_green_48.png',
+	'red' : 'images/logo_red_48.png',
+	'yellow' : 'images/logo_yellow_48.png'
+}
+
+const ERROR_MSG = "Server Not Responding.";
+
 
 let UpdatePopup = (state_text="loading..", state_color="grey", currentTabID=null) => {
 	let state_id = "#state";
-	let reload_icon = "(&#x21bb;)";
-	let state_html_content = " <button type='button' id='recheck_button' name='recheck_button'>" + reload_icon + "</button>";
+	let reload_icon = "<i class='fa fa-refresh' aria-hidden='true'></i>"
+	let state_html_content = " <button type='button' id='recheck_button' name='recheck_button' style='border:none;'>" + reload_icon + "</button>";
 
 	$(state_id).css('color', state_color);
 	$(state_id).text(state_text);
 	$(state_id).append(state_html_content);
 
+	// set extension color based on state, only if tab id is passed
 	if(currentTabID) {
-		let iconPath = 'images/logo_green_48.png'
-		if(state_color == 'red') {
-			iconPath = 'images/logo_red_48.png'
-		}
-		bkg.setExtensionIcon(iconPath, currentTabID);
+		bkg.setExtensionIcon(iconPath[state_color], currentTabID);
 	}
-
 }
 
 
 let UpdatePopupByState = () => {
-	UpdatePopup();
+	UpdatePopup();	// default loading popup
 
-	QUERY_OPTIONS = {
+	const QUERY_OPTIONS = {
 	  active: true,
 	  currentWindow: true
 	}
@@ -47,12 +51,10 @@ let UpdatePopupByState = () => {
 			}
 		})
 		.catch(err => {
-			// Default Popup
-			UpdatePopup();
-			bkg.console.log('Server Not Responding.' + err);
+			UpdatePopup(ERROR_MSG, 'yellow', tabs[0].id);
+			bkg.console.log(ERROR_MSG + err);
 		});
 	});
-
 }
 
 
@@ -60,7 +62,7 @@ let testLinkState = (div_id = "#test_link_box") => {
 	prefix_html_tag = "<p id='test_link_result' style='color:"
 	suffix_html_tag = "</p>"
 
-	$("#test_link_result").remove();	// remove previos result from test link checking.
+	$("#test_link_result").remove();	// remove previos result of test link before checking.
 	test_link = $("#test_link").val();
 
 	bkg.getPageState(test_link)
@@ -71,17 +73,18 @@ let testLinkState = (div_id = "#test_link_box") => {
 		}
 		// server didn't responded
 		else if(state == -1) {
-			$(div_id).append(prefix_html_tag + "yellow'> This url cannot br checked." + suffix_html_tag);
+			$(div_id).append(prefix_html_tag + "yellow'> This url cannot be checked." + suffix_html_tag);
 		}
 		// Malicious
 		else {
-			$(div_id).append(prefix_html_tag + "red'> This url is Malicious." + suffix_html_tag);
+			$(div_id).append(prefix_html_tag + "red'> This url might be Malicious." + suffix_html_tag);
 		}
 
 	})
 	.catch(err => {
-		// Default
-		bkg.console.log('Server Not Responding.');
+		// Default error
+		$(div_id).append(prefix_html_tag + "grey'>" + ERROR_MSG + suffix_html_tag);
+		bkg.console.log(ERROR_MSG);
 	});
 }
 

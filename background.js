@@ -1,13 +1,23 @@
 var bkg = chrome.extension.getBackgroundPage();
-// state determines the status of webpage after analysis
-// 0 -> safe,		1/2 -> malicious. 	-1 -> not determined / error
 
-api_link = 'https://malicious-urls-detection.herokuapp.com';
-predict_action_PATH = '/predict'
+const api_link = 'https://malicious-urls-detection.herokuapp.com';
+const predict_action_PATH = '/predict'
+
+// MAP for all known tabs url with state from server
+var tabs_url_state = new Map();
+
+var addTabsUrlState = (url, state) => {
+	tabs_url_state.set(url, state);
+}
+
+// use var for global scope
+var clearTabsUrlState = () => {
+	tabs_url_state.clear();
+}
+
 
 // get currrent state of webpage from server by sending webpage link
 var getPageState = (page_link="") => {
-
 	const options = {
 		method: 'POST',
 		body: JSON.stringify({url : page_link}),
@@ -30,43 +40,27 @@ var getPageState = (page_link="") => {
 
 let actionOnUnsafeURL = (url = "") => {
 	// window.alert("This Webpage might be malicious. If you don't trust this website leave.");
-	notification_name = "malicious_url_alert";
-	notification_OPTIONS = {
+	const notification_name = "malicious_url_alert";
+	const notification_OPTIONS = {
     type: 'basic',
-    iconUrl: 'https://kasikornbank.com/en/personal/Digital-banking/KBankCyberRisk/Pages/img/phishing/Kbank_icon_2-07.png',
+    iconUrl: 'images/logo_red_48.png',
     title: "Malicious URL detected",
     message: "This Webpage might be malicious. If you don't trust this website leave.\nURL : " + url
   };
-	chrome.notifications.create(notification_name, notification_OPTIONS, () => {
-
-	});
+	chrome.notifications.create(notification_name, notification_OPTIONS);
 }
 
 // change extesnion icon on a particular tab
 var setExtensionIcon = (iconPath, currentTabID) => {
-	bkg.console.log(iconPath + ' ' + currentTabID);
 	chrome.browserAction.setIcon({
     path : iconPath,
     tabId : currentTabID
   });
 }
 
-// MAP for all known tabs url with state from server
-let tabs_url_state = new Map();
-
-let addTabsUrlState = (url, state) => {
-	tabs_url_state.set(url, state);
-}
-
-// use var for global scope
-var clearTabsUrlState = () => {
-	tabs_url_state.clear();
-}
-
-
 // Any new tab is opened or reload.
 chrome.webNavigation.onBeforeNavigate.addListener(function() {
-	QUERY_OPTIONS = {
+	const QUERY_OPTIONS = {
 	  currentWindow: true
 	}
 
