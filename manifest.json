@@ -18,8 +18,11 @@
   ],
 
   "browser_action": {
-    // "default_icon": "icon.png",
-    "default_popup": "popup.html"
+    "default_icon" : {
+      "48" : "images/logo_green_48.png"
+    },
+    "default_popup" : "popup.html",
+    "default_title" : "Malicious Webpage Detector"
   },
 
   "background": {

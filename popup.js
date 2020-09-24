@@ -1,6 +1,7 @@
 var bkg = chrome.extension.getBackgroundPage();
 
-var UpdatePopup = (state_text="loading..", state_color="grey") => {
+
+var UpdatePopup = (state_text="loading..", state_color="grey", currentTabID=null) => {
 	let state_id = "#state";
 	let reload_icon = "(&#x21bb;)";
 	let state_html_content = " <button type='button' id='recheck_button' name='recheck_button'>" + reload_icon + "</button>";
@@ -8,6 +9,15 @@ var UpdatePopup = (state_text="loading..", state_color="grey") => {
 	$(state_id).css('color', state_color);
 	$(state_id).text(state_text);
 	$(state_id).append(state_html_content);
+
+	if(currentTabID) {
+		let iconPath = 'images/logo_green_48.png'
+		if(state_color == 'red') {
+			iconPath = 'images/logo_red_48.png'
+		}
+		bkg.setExtensionIcon(iconPath, currentTabID);
+	}
+
 }
 
 
@@ -23,24 +33,23 @@ var UpdatePopupByState = () => {
 	chrome.tabs.query(QUERY_OPTIONS, (tabs) => {
 		bkg.getPageState(tabs[0].url)
 		.then(state => {
-			bkg.console.log('asdas');
 			// safe
 			if(state == 0) {
-				UpdatePopup('Safe', 'green');
+				UpdatePopup('Safe', 'green', tabs[0].id);
 			}
 			// server didn't responded
 			else if(state == -1) {
-				UpdatePopup("Can't say", "yellow");
+				UpdatePopup("Can't say", "yellow", tabs[0].id);
 			}
 			// Malicious
 			else {
-				UpdatePopup("Malicious", "red");
+				UpdatePopup("Malicious", "red", tabs[0].id);
 			}
 		})
 		.catch(err => {
 			// Default Popup
 			UpdatePopup();
-			bkg.console.log('Server Not Responding.');
+			bkg.console.log('Server Not Responding.' + err);
 		});
 	});
 

@@ -42,6 +42,14 @@ var actionOnUnsafeURL = (url = "") => {
 	});
 }
 
+// change extesnion icon on a particular tab
+var setExtensionIcon = (iconPath, currentTabID) => {
+	bkg.console.log(iconPath + ' ' + currentTabID);
+	chrome.browserAction.setIcon({
+    path : iconPath,
+    tabId : currentTabID
+  });
+}
 
 // MAP for all known tabs url with state from server
 let tabs_url_state = new Map();
@@ -54,6 +62,7 @@ let addTabsUrlState = (url, state) => {
 var clearTabsUrlState = () => {
 	tabs_url_state.clear();
 }
+
 
 // Any new tab is opened or reload.
 chrome.webNavigation.onBeforeNavigate.addListener(function() {
