@@ -1,6 +1,6 @@
 var bkg = chrome.extension.getBackgroundPage();
 
-const api_link = 'https://malicious-urls-detection.herokuapp.com';
+const api_link = 'https://127.0.0.1:5000';
 const predict_action_PATH = '/predict'
 
 // MAP for all known tabs url with state from server
