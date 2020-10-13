@@ -11,4 +11,4 @@ To add this extension in google chrome.
 * Any url can be tested from Popup window.
 
 ## Debug
-* This url uses Malicious-webpage-detection server api for detection.
+* This repository depends on the Malicious-webpage-detection server api for detection. link : https://github.com/naeem-akhtar/Malicious-webpage-detection
